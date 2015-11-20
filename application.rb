@@ -4,6 +4,8 @@ require 'pg'
 require 'rack'
 require 'rack/contrib'
 require 'json'
+require 'httparty'
+
 Bundler.require :default, (ENV['RACK_ENV'] || 'development').to_sym
 
 # Basic Sinatra app that takes posts to /segment and inserts them in a PG DB
@@ -13,6 +15,10 @@ class Application < Sinatra::Base
   end
 
   def initialize
+    unless ENV['FB_AUTH_TOKEN']
+      puts "DATABASE_URL not specified - exiting"
+      exit
+    end
     uri = URI.parse(ENV['DATABASE_URL'])
     
     begin
@@ -43,6 +49,28 @@ class Application < Sinatra::Base
         logger.error "Problem with (#{params[:event]}) @#{params[:timestamp]}"
         logger.error err.message
       end
+
+      if params[:event] == 'Completed Order'
+        post_to_ga(params)
+      end
+    end
+  end
+
+  def post_to_ga(event)
+    GA_ENDPOINT = 'http://www.google-analytics.com/collect'
+    params = {
+      v: 1,
+      tid: ENV['GA_TRACKING_ID'],
+      cid: '555',
+      t: 'event',
+      ec: 'All',
+      ea: 'Completed Order'
+    }
+
+    begin
+      HTTParty.get(GA_ENDPOINT, params)
+    rescue Exception => e
+      puts "Problem notifying GA"
     end
   end
 end

@@ -6,6 +6,7 @@ gem 'pg'
 gem 'thin'
 gem 'rack-contrib'
 gem 'rake'
+gem 'httparty'
 
 group :development, :test do
   gem 'byebug'

@@ -35,30 +35,28 @@ class Application < Sinatra::Base
 
   post '/' do
     if params[:type] == 'track'
-      # ONLY dumping completed orders into the DB so we can see them later
-      if params[:event] == 'Completed Order'
-        begin
-          # NOTE: currently erroring out when there is a quote in the name
-          puts "everything!"
-          puts params.inspect
-          @db.exec("INSERT INTO events (                  \
-                                  event_name,             \
-                                  occurred_at,            \
-                                  user_id,                \
-                                  details                 \
-                    ) VALUES (                            \
-                        '#{params[:event]}',              \
-                        '#{params[:timestamp]}',          \
-                        '#{params[:userId]}',             \
-                        '#{params[:properties].to_json}'  \
-                    )")
-        rescue PG::Error => err
-          logger.error "Problem with (#{params[:event]}) @#{params[:timestamp]}"
-          logger.error err.message
-        end
+      begin
+        # NOTE: currently erroring out when there is a quote in the name
+        @db.exec("INSERT INTO events (                  \
+                                event_name,             \
+                                occurred_at,            \
+                                user_id,                \
+                                details                 \
+                  ) VALUES (                            \
+                      '#{params[:event]}',              \
+                      '#{params[:timestamp]}',          \
+                      '#{params[:userId]}',             \
+                      '#{params[:properties].to_json}'  \
+                  )")
+      rescue PG::Error => err
+        logger.error "Problem with (#{params[:event]}) @#{params[:timestamp]}"
+        logger.error err.message
+      end
 
+      if params[:event] == 'Completed Order Client-Side'
         post_to_ga(params)
       end
+
     end
   end
 
@@ -85,17 +83,11 @@ class Application < Sinatra::Base
 
     begin
       response = HTTParty.post(GA_ENDPOINT, body: body)
-
-      # SHITTY DEBUG LOGGING
-      puts "Sent an event to GA"
-      puts "response:"
-      puts response.inspect.to_json
-      puts "body:"
-      puts body.inspect.to_json
-      puts "event:"
-      puts event.inspect.to_json
+      if response.code != 200
+        puts "Problem notifying GA for #{body.inspect}"
+      end
     rescue Exception => e
-      puts "Problem notifying GA"
+      puts "Problem notifying GA: #{e.message}"
     end
   end
 end

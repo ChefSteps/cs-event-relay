@@ -74,6 +74,7 @@ class Application < Sinatra::Base
       body.merge! ({
         cs: event[:context]['campaign']['source'],
         cm: event[:context]['campaign']['medium'],
+        cn: event[:context]['campaign']['name'],
         cc: event[:context]['campaign']['content']
       })
     end

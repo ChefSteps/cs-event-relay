@@ -54,7 +54,7 @@ class Application < Sinatra::Base
       puts "here's everything"
       puts params.inspect
 
-      if params[:event] == 'standard Button Clicked'
+      if params[:event] == 'Component Shown'
         post_to_ga(params)
       end
     end

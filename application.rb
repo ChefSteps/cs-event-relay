@@ -62,7 +62,7 @@ class Application < Sinatra::Base
   end
 
   def post_to_ga(event)
-    params = {
+    body = {
       v: 1,
       tid: ENV['GA_TRACKING_ID'],
       cid: '555',
@@ -72,7 +72,7 @@ class Application < Sinatra::Base
     }
 
     begin
-      HTTParty.get(GA_ENDPOINT, params)
+      HTTParty.post(GA_ENDPOINT, body: body)
       puts "Sent an event to GA"
       puts event.inspect
     rescue Exception => e

@@ -53,7 +53,8 @@ class Application < Sinatra::Base
       # end
       puts "here's everything"
       puts params.inspect
-
+      puts "here's the fucking event"
+      puts params[:event]
       if params[:event] == 'Component Shown'
         post_to_ga(params)
       end

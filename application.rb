@@ -71,7 +71,7 @@ class Application < Sinatra::Base
     }
     if event[:context]['campaign']
       puts "mergeing campaign info"
-      body.merge ({
+      body.merge! ({
         cs: event[:context]['campaign']['source'],
         cm: event[:context]['campaign']['medium'],
         cc: event[:context]['campaign']['content']

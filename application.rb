@@ -51,10 +51,6 @@ class Application < Sinatra::Base
       #   logger.error "Problem with (#{params[:event]}) @#{params[:timestamp]}"
       #   logger.error err.message
       # end
-      puts "here's everything"
-      puts params.inspect
-      puts "here's the fucking event"
-      puts params[:event]
       if params[:event] == 'Component Shown'
         post_to_ga(params)
       end
@@ -72,9 +68,14 @@ class Application < Sinatra::Base
     }
 
     begin
-      HTTParty.post(GA_ENDPOINT, body: body)
+      response = HTTParty.post(GA_ENDPOINT, body: body)
       puts "Sent an event to GA"
-      puts event.inspect
+      puts "response:"
+      puts response.inspect.to_json
+      puts "body:"
+      puts body.inspect.to_json
+      puts "event:"
+      puts event.inspect.to_json
     rescue Exception => e
       puts "Problem notifying GA"
     end

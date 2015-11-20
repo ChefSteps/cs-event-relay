@@ -39,6 +39,8 @@ class Application < Sinatra::Base
       if params[:event] == 'Completed Order'
         begin
           # NOTE: currently erroring out when there is a quote in the name
+          puts "everything!"
+          puts params.inspect
           @db.exec("INSERT INTO events (                  \
                                   event_name,             \
                                   occurred_at,            \
@@ -69,6 +71,7 @@ class Application < Sinatra::Base
       ec: 'All',
       ea: 'Completed Order',
       ev: event[:properties]['revenue'],
+      el: event[:properties]['product_skus'].first,
       uid: event[:userId],
     }
     if event[:context]['campaign']

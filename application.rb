@@ -48,12 +48,9 @@ class Application < Sinatra::Base
                                 occurred_at,            \
                                 user_id,                \
                                 details                 \
-                  ) VALUES (                            \
-                      $1,                               \
-                      $2,                               \
-                      $3,                               \
-                      $4                                \
-                  )", query_params)
+                  ) VALUES ($1, $2, $3, $4)", 
+                  query_params)
+        
       rescue PG::Error => err
         logger.error "Problem with (#{params[:event]}) @#{params[:timestamp]}"
         logger.error err.message

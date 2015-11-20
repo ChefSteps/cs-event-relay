@@ -52,28 +52,29 @@ class Application < Sinatra::Base
         logger.error err.message
       end
 
-      if params[:event] == 'Completed Order'
-        post_to_ga(params)
-      end
+      # if params[:event] == 'Completed Order'
+        
+      #   post_to_ga(params)
+      # end
     end
   end
 
-  def post_to_ga(event)
-    params = {
-      v: 1,
-      tid: ENV['GA_TRACKING_ID'],
-      cid: '555',
-      t: 'event',
-      ec: 'All',
-      ea: 'Completed Order'
-    }
+  # def post_to_ga(event)
+  #   params = {
+  #     v: 1,
+  #     tid: ENV['GA_TRACKING_ID'],
+  #     cid: '555',
+  #     t: 'event',
+  #     ec: 'All',
+  #     ea: 'Completed Order'
+  #   }
 
-    begin
-      HTTParty.get(GA_ENDPOINT, params)
-      puts "Sent an event to GA"
-      puts params.inspect
-    rescue Exception => e
-      puts "Problem notifying GA"
-    end
-  end
+  #   begin
+  #     HTTParty.get(GA_ENDPOINT, params)
+  #     puts "Sent an event to GA"
+  #     puts params.inspect
+  #   rescue Exception => e
+  #     puts "Problem notifying GA"
+  #   end
+  # end
 end

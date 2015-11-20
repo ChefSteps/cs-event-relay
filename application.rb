@@ -45,6 +45,7 @@ class Application < Sinatra::Base
       #                 '#{params[:event]}',              \
       #                 '#{params[:timestamp]}',          \
       #                 '#{params[:userId]}',             \
+      ## NOTE: currently erroring out when there is a quote in the name
       #                 '#{params[:properties].to_json}'  \
       #             )")
       # rescue PG::Error => err
@@ -64,8 +65,18 @@ class Application < Sinatra::Base
       cid: '555',
       t: 'event',
       ec: 'All',
-      ea: 'Completed Order'
+      ea: 'Completed Order',
+      ev: event[:properties]['revenue'],
+      uid: event[:userId],
     }
+    if event[:context]['campaign']
+      puts "mergeing campaign info"
+      body.merge ({
+        cs: event[:context]['campaign']['source'],
+        cm: event[:context]['campaign']['medium'],
+        cc: event[:context]['campaign']['content']
+      })
+    end
 
     begin
       response = HTTParty.post(GA_ENDPOINT, body: body)

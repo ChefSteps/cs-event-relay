@@ -6,12 +6,12 @@ require 'rack/contrib'
 require 'json'
 require 'httparty'
 
-GA_ENDPOINT = 'http://www.google-analytics.com/collect'
-
 Bundler.require :default, (ENV['RACK_ENV'] || 'development').to_sym
 
 # Basic Sinatra app that takes posts to /segment and inserts them in a PG DB
 class Application < Sinatra::Base
+  GA_ENDPOINT = 'http://www.google-analytics.com/collect'
+
   configure :production, :development do
     enable :logging
   end

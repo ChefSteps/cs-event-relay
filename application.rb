@@ -71,6 +71,7 @@ class Application < Sinatra::Base
     begin
       HTTParty.get(GA_ENDPOINT, params)
       puts "Sent an event to GA"
+      puts params.inspect
     rescue Exception => e
       puts "Problem notifying GA"
     end

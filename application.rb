@@ -6,6 +6,8 @@ require 'rack/contrib'
 require 'json'
 require 'httparty'
 
+GA_ENDPOINT = 'http://www.google-analytics.com/collect'
+
 Bundler.require :default, (ENV['RACK_ENV'] || 'development').to_sym
 
 # Basic Sinatra app that takes posts to /segment and inserts them in a PG DB
@@ -15,7 +17,7 @@ class Application < Sinatra::Base
   end
 
   def initialize
-    unless ENV['FB_AUTH_TOKEN']
+    unless ENV['DATABASE_URL']
       puts "DATABASE_URL not specified - exiting"
       exit
     end
@@ -57,7 +59,6 @@ class Application < Sinatra::Base
   end
 
   def post_to_ga(event)
-    GA_ENDPOINT = 'http://www.google-analytics.com/collect'
     params = {
       v: 1,
       tid: ENV['GA_TRACKING_ID'],

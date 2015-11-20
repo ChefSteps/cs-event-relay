@@ -51,6 +51,8 @@ class Application < Sinatra::Base
       #   logger.error "Problem with (#{params[:event]}) @#{params[:timestamp]}"
       #   logger.error err.message
       # end
+      puts "here's everything"
+      puts params.inspect
 
       if params[:event] == 'Completed Order'
         post_to_ga(params)

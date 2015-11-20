@@ -35,24 +35,26 @@ class Application < Sinatra::Base
 
   post '/' do
     if params[:type] == 'track'
-      # begin
-      #   @db.exec("INSERT INTO events (                  \
-      #                           event_name,             \
-      #                           occurred_at,            \
-      #                           user_id,                \
-      #                           details                 \
-      #             ) VALUES (                            \
-      #                 '#{params[:event]}',              \
-      #                 '#{params[:timestamp]}',          \
-      #                 '#{params[:userId]}',             \
-      ## NOTE: currently erroring out when there is a quote in the name
-      #                 '#{params[:properties].to_json}'  \
-      #             )")
-      # rescue PG::Error => err
-      #   logger.error "Problem with (#{params[:event]}) @#{params[:timestamp]}"
-      #   logger.error err.message
-      # end
-      if params[:event] == 'Component Shown'
+      # ONLY dumping completed orders into the DB so we can see them later
+      if params[:event] == 'Completed Order'
+        begin
+          # NOTE: currently erroring out when there is a quote in the name
+          @db.exec("INSERT INTO events (                  \
+                                  event_name,             \
+                                  occurred_at,            \
+                                  user_id,                \
+                                  details                 \
+                    ) VALUES (                            \
+                        '#{params[:event]}',              \
+                        '#{params[:timestamp]}',          \
+                        '#{params[:userId]}',             \
+                        '#{params[:properties].to_json}'  \
+                    )")
+        rescue PG::Error => err
+          logger.error "Problem with (#{params[:event]}) @#{params[:timestamp]}"
+          logger.error err.message
+        end
+
         post_to_ga(params)
       end
     end
@@ -70,7 +72,6 @@ class Application < Sinatra::Base
       uid: event[:userId],
     }
     if event[:context]['campaign']
-      puts "mergeing campaign info"
       body.merge! ({
         cs: event[:context]['campaign']['source'],
         cm: event[:context]['campaign']['medium'],
@@ -81,6 +82,8 @@ class Application < Sinatra::Base
 
     begin
       response = HTTParty.post(GA_ENDPOINT, body: body)
+
+      # SHITTY DEBUG LOGGING
       puts "Sent an event to GA"
       puts "response:"
       puts response.inspect.to_json

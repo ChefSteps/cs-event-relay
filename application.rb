@@ -36,18 +36,24 @@ class Application < Sinatra::Base
   post '/' do
     if params[:type] == 'track'
       begin
-        # NOTE: currently erroring out when there is a quote in the name
+        query_params = [
+                          params[:event], 
+                          params[:timestamp], 
+                          params[:userId], 
+                          params[:properties].to_json
+                        ]
+
         @db.exec("INSERT INTO events (                  \
                                 event_name,             \
                                 occurred_at,            \
                                 user_id,                \
                                 details                 \
                   ) VALUES (                            \
-                      '#{params[:event]}',              \
-                      '#{params[:timestamp]}',          \
-                      '#{params[:userId]}',             \
-                      '#{params[:properties].to_json}'  \
-                  )")
+                      $1,                               \
+                      $2,                               \
+                      $3',                              \
+                      $4'                               \
+                  )", query_params)
       rescue PG::Error => err
         logger.error "Problem with (#{params[:event]}) @#{params[:timestamp]}"
         logger.error err.message

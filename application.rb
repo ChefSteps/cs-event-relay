@@ -56,7 +56,7 @@ class Application < Sinatra::Base
         logger.error err.message
       end
 
-      if params[:event] == 'Completed Order Client-Side'
+      if params[:event] == 'Completed Order'
         post_to_ga(params)
       end
 

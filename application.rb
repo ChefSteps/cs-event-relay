@@ -18,7 +18,7 @@ class Application < Sinatra::Base
 
   def initialize
     unless ENV['DATABASE_URL']
-      puts "DATABASE_URL not specified - exiting"
+      logger.error "DATABASE_URL not specified - exiting"
       exit
     end
     uri = URI.parse(ENV['DATABASE_URL'])
@@ -26,7 +26,7 @@ class Application < Sinatra::Base
     begin
       @db = PG.connect(uri.hostname, uri.port, nil, nil, uri.path[1..-1], uri.user, uri.password)
     rescue
-      puts 'Problem connecting to Postgres. Exiting.'
+      logger.error 'Problem connecting to Postgres. Exiting.'
       exit
     end
 
@@ -50,7 +50,7 @@ class Application < Sinatra::Base
                                 details                 \
                   ) VALUES ($1, $2, $3, $4)", 
                   query_params)
-        
+        logger.info "Inserting an event into the database: #{query_params.inspect}"
       rescue PG::Error => err
         logger.error "Problem with (#{params[:event]}) @#{params[:timestamp]}"
         logger.error err.message
@@ -87,10 +87,12 @@ class Application < Sinatra::Base
     begin
       response = HTTParty.post(GA_ENDPOINT, body: body)
       if response.code != 200
-        puts "Problem notifying GA for #{body.inspect}"
+        logger.error "Problem notifying GA for #{body.inspect}"
+      else
+        logger.info "Inserted an event into GA: #{body.inspect}"
       end
     rescue Exception => e
-      puts "Problem notifying GA: #{e.message}"
+      logger.error "Problem notifying GA: #{e.message}"
     end
   end
 end

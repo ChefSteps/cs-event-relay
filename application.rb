@@ -8,7 +8,7 @@ require 'httparty'
 
 Bundler.require :default, (ENV['RACK_ENV'] || 'development').to_sym
 
-# Basic Sinatra app that takes posts to /segment and inserts them in a PG DB
+# Basic Sinatra app that takes segment webhook posts and inserts them in a PG DB
 class Application < Sinatra::Base
   GA_ENDPOINT = 'http://www.google-analytics.com/collect'
 

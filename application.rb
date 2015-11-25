@@ -34,6 +34,7 @@ class Application < Sinatra::Base
   end
 
   post '/' do
+    logger.info params.inspect
     if params[:type] == 'track'
       begin
         query_params = [

@@ -68,7 +68,7 @@ class Application < Sinatra::Base
     body = {
       v: 1,
       tid: ENV['GA_TRACKING_ID'],
-      cid: '555',
+      cid: event[:context]['GoogleAnalytics']['clientId'],
       t: 'event',
       ec: 'All',
       ea: 'Completed Order',

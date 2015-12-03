@@ -18,7 +18,7 @@ class Application < Sinatra::Base
 
   def initialize
     unless ENV['DATABASE_URL']
-      logger.error "DATABASE_URL not specified - exiting"
+      puts "DATABASE_URL not specified - exiting"
       exit
     end
     uri = URI.parse(ENV['DATABASE_URL'])
@@ -26,7 +26,7 @@ class Application < Sinatra::Base
     begin
       @db = PG.connect(uri.hostname, uri.port, nil, nil, uri.path[1..-1], uri.user, uri.password)
     rescue
-      logger.error 'Problem connecting to Postgres. Exiting.'
+      puts 'Problem connecting to Postgres. Exiting.'
       exit
     end
 
@@ -82,6 +82,12 @@ class Application < Sinatra::Base
         cm: event[:context]['campaign']['medium'],
         cn: event[:context]['campaign']['name'],
         cc: event[:context]['campaign']['content']
+      })
+    end
+
+    if event[:context]['referrer']
+      body.merge! ({
+        dr: event[:context]['referrer']['url']
       })
     end
 

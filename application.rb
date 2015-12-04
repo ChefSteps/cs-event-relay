@@ -75,6 +75,7 @@ class Application < Sinatra::Base
       el: event[:properties]['product_skus'].first,
       uid: event[:userId],
     }
+    body.merge! ({ cid: event[:context]['GoogleAnalytics']['clientId'] }) if event[:context]['GoogleAnalytics']
 
     if event[:context]['campaign']
       utm_source = event[:context]['campaign']['source']

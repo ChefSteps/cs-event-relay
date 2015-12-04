@@ -68,7 +68,6 @@ class Application < Sinatra::Base
     body = {
       v: 1,
       tid: ENV['GA_TRACKING_ID'],
-      cid: event[:context]['GoogleAnalytics']['clientId'],
       t: 'event',
       ec: 'All',
       ea: 'Completed Order',
@@ -76,20 +75,31 @@ class Application < Sinatra::Base
       el: event[:properties]['product_skus'].first,
       uid: event[:userId],
     }
+
     if event[:context]['campaign']
+      utm_source = event[:context]['campaign']['source']
+      utm_medium = event[:context]['campaign']['medium']
+
       body.merge! ({
-        cs: event[:context]['campaign']['source'],
-        cm: event[:context]['campaign']['medium'],
         cn: event[:context]['campaign']['name'],
         cc: event[:context]['campaign']['content']
       })
     end
 
     if event[:context]['referrer']
-      body.merge! ({
-        dr: event[:context]['referrer']['url']
-      })
+      begin
+        referring_domain = URI.parse(event[:context]['referrer']['url'])
+      rescue URI::InvalidURIError => e
+        referring_domain = nil
+      end
+      body.merge! ({ dr: referring_domain.to_s }) 
     end
+
+    source, medium = forge_source_medium(utm_source, utm_medium, referring_domain)
+    body.merge! ({
+      cs: source,
+      cm: medium
+    })
 
     begin
       response = HTTParty.post(GA_ENDPOINT, body: body)
@@ -102,4 +112,34 @@ class Application < Sinatra::Base
       logger.error "Problem notifying GA: #{e.message}"
     end
   end
+
+  def forge_source_medium(utm_source, utm_medium, referring_domain)
+    # working off of: https://support.google.com/analytics/answer/3297892?hl=en
+    # organic: <source> / organic
+    # referrer: <referring domain> / referral
+    # direct: nil / (none)
+    # UTM params take priority over the domain they came from
+    if utm_source
+      source = utm_source
+    elsif referring_domain && match = /bing|google/.match(referring_domain.hostname)
+      source = match[0]
+    elsif referring_domain
+      source = referring_domain.hostname
+    else
+      source = nil
+    end
+
+    if utm_medium
+      medium = utm_medium
+    elsif referring_domain && match = /bing|google/.match(referring_domain.hostname)
+      medium = 'organic'
+    elsif referring_domain
+      medium = 'referral'
+    else
+      medium = '(none)'
+    end
+
+    return source, medium
+  end
+
 end
